@@ -1,0 +1,499 @@
+---
+title: "R Notebook"
+output:
+  html_notebook: default
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+printf <- function(...) cat(sprintf(...))
+```
+
+
+# Prova de Especialização
+
+- Primeiramente vamos importar os dados:
+
+```{r analysis, results="markup"}
+wine.data <- readxl::read_excel('exe.xlsx', 'D')
+head(wine.data)
+```
+
+
+Os dados do vinho são referentes aos atributos Claridade, Aroma, Corpo, Sabor, Afinação e Qualidade. O nosso objetivo no estudo é relacionar os atributos Claridades, Aroma, Corpo, Sabor e Afinação com a Qualidade do vinho, ou seja, quais desses atributos interferem na qualidade.
+
+#### **a) Estime $\beta$ pelo método dos mínimos quadrados. Explique o procedimento.**
+
+O objetivo é saber os valores $\widehat{\beta1}$, $\widehat{\beta2}$, $\widehat{\beta3}$, $\widehat{\beta4}$, $\widehat{\beta5}$ que minimize a soma...
+
+Para isso, precisa-se calcular a *Qualidade Estimada* ($\widehat{Y}$), que é:
+
+$$
+\widehat{Y} =  \beta0 + \beta1*Claridade + \beta2*Aroma + \beta3*Corpo + \beta4*Sabor + \beta5*Afinacao
+$$
+```{r}
+Claridade <- wine.data$Clari
+Aroma <- wine.data$Aroma
+Corpo <- wine.data$Corpo
+Sabor <- wine.data$Sabor
+Afinacao <- wine.data$Afina
+Y <- wine.data$Qua
+
+desvioY <- function(betas) {
+  Y.Estimado <- betas[1] + betas[2]*Claridade + betas[3]*Aroma + betas[4]*Corpo + betas[5]*Sabor + betas[6]*Afinacao
+  S <- sum( (Y - Y.Estimado)^2 )
+}
+```
+
+A função `desvioY`, calcula o resíduo dos Y ($Qualidade Real - Qualidade Estimada$), eleva ao quadrado para não haver números negativos eliminando números positivos e por fim soma tudo. É essa função que se gostaria que fosse a menor possível.
+
+Ou seja, o objetivo é saber os valores dos $\widehat{\beta1}$, $\widehat{\beta2}$, $\widehat{\beta3}$, $\widehat{\beta4}$, $\widehat{\beta5}$ que minimize a soma S.
+
+Aplicando a função `optim` temos os betas procurados:
+
+```{r}
+R.2 <- optim(par = c(1,1,1,1,1,1), fn = desvioY, method = "L-BFGS-B")
+R.2$par
+```
+
+Executando a regressão linear para ter valores matemáticos mais exatos, temos:
+
+```{r}
+U <- lm(Y~Claridade+Aroma+Corpo+Sabor+Afinacao)
+U$coefficients
+```
+
+Comparando os valores dos $\widehat{betas}$ pelo método dos mínimos quadrados com os valores reais da regressão linear, observamos que os valores estão bem próximos.
+
+#### **b) Você concorda que uma relação linear é adequada? Como avaliaria no caso da Regressão Linear Múltipla?**
+
+Caso tivéssemos a variável de resposta Y relacionada com uma única variável independente X, seria suficiente fazer um diagrama de dispersão do relacionando Y com X. Porém, nós temos 5 variáveis (dimensões), sem adicionar o Y. 
+
+Portanto, precisamos fazer um gráfico de dispersão do resíduo com cada uma das variáveis independentes (Claridade, Aroma, Corpo, Sabor, Afinacao), esperando um padrão aleatório em cada um desses gráficos.
+
+Lembrando que *Resídio* é tudo que não foi explicado da qualidade do vinho.
+
+Plotando os gráficos relacionando as variávies independentes (Claridade, Aroma, Corpo, Sabor, Afinacao) em relação com o Resíduo *não* se observa um padrão linear em nenhuma delas.
+
+Logo, é razoável se trabalhar com uma Regressão Linear, pois o que se sobrou no resíduo não possui efeito não linear no modelo.
+
+```{r}
+par(mfrow=c(2,3))
+
+plot(Claridade, U$residuals)
+plot(Aroma, U$residuals)
+plot(Corpo, U$residuals)
+plot(Sabor, U$residuals)
+plot(Afinacao, U$residuals)
+```
+#### **c)Estime a variância da componente erro utilizando um estimador não viciado ($\sigma^2$). Explique o procedimento**
+
+A variância não viciada do componente erro trata-se da variância dos resíduos corrigida pelo número de parâmetro estimados, logo:
+
+$\sigma^2 = Var(residuos) / (n - Quantidade De Parâmetros Estimados) $
+
+*Observação: utilizamos do artifício matemático de multiplicar por (n -1) para eliminar o denominador da fórmula utilizada no cálculo da variância dos resíduos.*
+
+```{r}
+n <- 38
+quantidadeParametrosEstimados <- 6
+sigma.2 <- var(U$residuals) * (n -1 ) / (n - quantidadeParametrosEstimados)
+sigma.2
+```
+
+#### **d) Estime a variância de $\widehat{\beta_4}$ (relativo ao sabor). Explique o procedimento.**
+
+Iremos estimar a variância através da matriz utilizando a estimativa de mínimos quadrados de $\beta = (X'X)^-1$
+
+- Para obtermos a Matriz de planejamento X:
+
+```{r}
+X <- model.matrix(U)
+head.matrix(X)
+```
+
+- Calculando a transposta da matriz:
+
+```{r}
+X.linha <- t(X)
+head.matrix(X.linha)
+```
+
+- Multiplica a tranposta (X') por X:
+
+```{r}
+X1 <- X.linha%*%X
+head.matrix(X1)
+```
+
+- Calculando a inversa de $(X'X)^-1$:
+
+```{r}
+X.inversa <- solve(X1)
+head.matrix(X.inversa)
+```
+
+- Calculando a variância do modelo:
+
+```{r}
+U.summary <- summary(U)
+variancia.modelo <- (U.summary$sigma)^2
+variancia.modelo
+```
+
+- Por fim, calculando a variância de $\widehat{\beta_4}$. Observamos na matriz *X.inversa* (calculada acima) que o valor da estimativa do mínimo quadrado de $\widehat{\beta_4}$ (sabor) encontra-se na linha 5 e coluna 5.
+
+```{r}
+beta4.variancia <- variancia.modelo * X.inversa[5,5]
+beta4.variancia
+```
+
+#### **e)Teste a significância da regressão usando nível de confiança 95%. Utilize abordagem analítica e Bootstrap paramétrico. Ou seja, faça o teste de hipóteses $H_0: \beta1 = \beta2 = \beta3 = \beta4 = \beta5 = 0$ versus $H_1: C.C$. Verifique as hipóteses associadas a componente erro do modelo por meio de gráficos e teste de hipóteses (normalidade, homocedasticidade e não autocorrelação).**
+
+- Calculando $R^2$ (Coeficiente de determinação que significa a proporção da variablidade dos dados explicados pelo modelo) usando a fórmula $R^2 = Variancia(\widehat{Y}) / Variancia(Y)$:
+
+```{r}
+R2 <- var(U$fitted.values) / var(wine.data$Qua)
+R2
+```
+
+Uma outra forma de saber o valor do $R^2$ é:
+
+```{r}
+U.summary$r.squared
+```
+
+- Calculando a estatística do teste:
+
+```{r}
+numeroBetasHo = 5
+n <- 38
+numeroParametrosEstimado <- 6
+
+Fobs <- (R2 / numeroBetasHo) / ((1- R2) / (n - numeroParametrosEstimado))
+Fobs
+```
+
+Uma outra forma de saber o Fobs é:
+
+```{r}
+U.summary$fstatistic
+```
+
+- Calculando o F tabelado.
+
+Para o teste de hipótese a Região de Rejeição é apenas a região direita (unilateral). Para encontrar:
+
+```{r}
+LS <- qf(0.95, numeroBetasHo, n - numeroParametrosEstimado)
+LS
+```
+
+- Calculando p-value (probabilidade de significância):
+
+Iremos calcular o p-value com a probabilidade da área à direita do $F_observado$.
+
+Observação: a função `pf` do R calcula apenas a R abaixo, por isso realizamos a operação `1 - pf`.
+
+```{r}
+p.value <- 1 - pf(Fobs, numeroBetasHo, n - numeroParametrosEstimado)
+p.value
+```
+
+Conclusão: como o $F_observado(16.50616) > LS(2.512255)$ eu **REJEITO** $H_0$ ao nível de confiança de 95% ou **REJEITO** $H_0$ ao nível de significância de 5% e decido que pelo menos uma das variáveis interfere na qualidade do vinho com essa confiança de 95% ou significância de 5%.
+
+- Verificando as hipóteses associadas:
+
+Para isso precisamos obter os resíduos (lembrando que resíduos é $Y(Qualidade) - \widehat{Y}(QualidadeEstimada)$)
+
+```{r}
+residuos <- U$residuals
+head(residuos)
+hist(residuos)
+```
+
+Apesar do histograma lembrar uma distribuição normal, não é suficiente para chegarmos a uma conclusão. Para isso iremos realizar um teste de normalidade usando `nortest`.
+
+```{r}
+resultado <- nortest::ad.test(residuos)
+resultado
+```
+
+Conclusão: não **REJEITO** $H_0$ ao nível de confiança de 95%, ou seja, os dados podem ser considerados normais ao nível de confiança de 95%.
+
+- Verificando a Homocedasticidade (variância constante)
+
+Uma maneira de verificarmos a homocedasticidade é fazer o gráfico dos resíduos versus $\widehat{Y}$. Caso a propriedade de homocedasticidade esteja presente espera-se um padrão aleatório.
+
+```{r}
+plot(U$fitted.values, U$residuals)
+```
+
+Pela análise do gráfico observamos um padrão aleatório e os resíduos são homocedásticos. Para ter mais segurança, fazemos um teste de hipótese (*Teste Geral de White*):
+
+```{r}
+homocedastico <- lmtest::bptest(U,~fitted(U)+I(fitted(U)^2))
+homocedastico
+```
+
+$H_0$ no Teste Geral de White signfica que os dados **são homocedásticos** e $H_1$ são dados **não homocedásticos**. Logo, pelo p-value não **REJEITO** $H_0$ (que os dados são homocedásticos) ao nível de confiança de 95% ou ao nível de significância de 5%.
+
+- Verificando a autocorrelação
+
+Gerando gráficos para verificar a autocorrelação :
+
+```{r}
+par(mfrow=c(2,3))
+
+plot(residuos[2:n], residuos[1:n-1],main = 'Ordem 1')
+plot(residuos[3:n], residuos[1:(n-2)], main = 'Ordem 2')
+plot(residuos[4:n], residuos[1:(n-3)], main = 'Ordem 3')
+```
+
+Os gráficos são inconclusivos, para termos certeza vamos realizar o teste de Hipótese de **Breusch-Godfrey**:
+
+```{r}
+autocorrelacao.ordem.1 <- lmtest::bgtest (U , order=1)
+autocorrelacao.ordem.1
+autocorrelacao.ordem.2 <- lmtest::bgtest (U , order=2)
+autocorrelacao.ordem.2
+autocorrelacao.ordem.3 <- lmtest::bgtest (U , order=3)
+autocorrelacao.ordem.3
+
+```
+
+A hipótese $H_0$ é que os dados são **não autocorrelacionados** e como o p-valor é menor do que o nível de significância (0.05) (para as ordens 1,2 e 3) eu **REJEITO** $H_0$ ao nível de confiança de 95% ou **REJEITO** $H_0$ ao nível de significância de 5%.
+
+Logo, eu **REJEITO** a hipótese de que os dados **são não autocorrelacionados**, ou seja, há uma autocorrelação nos dados.
+
+- Aplicando Bootstrap paramétrico
+
+Verificando a hipótese $H_0: \beta1 = \beta2 = \beta3 = \beta4 = \beta5 = 0$ através do Bootstrap paramétrico
+
+```{r}
+corridas <- 50000
+GG <- matrix(0, corridas, 1)
+U <- lm(wine.data$Qua~wine.data$Clari + wine.data$Aroma + wine.data$Corpo + wine.data$Sabor + wine.data$Afina)
+estimado.beta0 <- U$coefficients[1]
+estimado.beta1 <- U$coefficients[2]
+estimado.beta2 <- U$coefficients[3]
+estimado.beta3 <- U$coefficients[4]
+estimado.beta4 <- U$coefficients[5]
+estimado.beta5 <- U$coefficients[6]
+
+dp <- summary(U)$sigma
+W <- summary(U)
+
+Fobs <- W$fstatistic[1]
+nLinhas <- 38
+
+for(i in 1:corridas){
+  #Teste para Clari - Sob H0 temos B1 = 0
+  Y1 <- estimado.beta0 + 0*wine.data$Clari + 0*wine.data$Aroma + 0*wine.data$Corpo + 0*wine.data$Sabor + 0*wine.data$Afina + rnorm(nLinhas,0,dp)
+  U1 <- lm(Y1~wine.data$Clari + wine.data$Aroma + wine.data$Corpo + wine.data$Sabor + wine.data$Afina)
+  W <- summary(U1)
+  GG[i,1] <- W$fstatistic[1] #F calc
+}
+
+
+```
+
+
+```{r}
+LimiteComputacional <- quantile(GG[,1], c(.95))
+LimiteComputacional
+
+pvalue <- mean(GG[,1]>Fobs)
+pvalue
+
+#Limites Teóricos
+LimitesTeoricos <- qf(0.95,5,32)
+LimitesTeoricos
+
+```
+
+Como p-valor tem aproximadamente 0 eu **REJEITO** $H_0$ e concluo que alguma variável interfere na qualidade do vinho ao nível de confiança de 95%.
+
+#### **f)Tendo rejeitado $H_0$ no item e), obtenha um modelo final contendo as variáveis relevantes.**
+
+Após a execução do modelo de regressão linear, podemos eliminar a variável Corpo e Claridade do modelo. E incluir a variável **Sabor**, **Afinação**. Sobre a variável **Aroma** ficamos na dúvida e por conta disso é sugestão adicionar no modelo.
+
+```{r}
+U <- lm(wine.data$Qua~wine.data$Clari + wine.data$Aroma + wine.data$Corpo + wine.data$Sabor + wine.data$Afina)
+U.summary <- summary(U)
+U.summary
+```
+
+- Fazendo uma análise específica da variável **Sabor**, ou seja, $H_0: \beta4 = 0$. Para isso temos que calcular o valor do Tcal ($T_{cal} = DesvioPadraoEstimado(variaval) / Error(variaval)$).
+
+```{r}
+Sabor.Tcal <- U$coefficients[5] / U.summary$coefficients[5,2]
+Sabor.Tcal
+```
+
+Obtendo informação do $T_{tabelado}$:
+
+```{r}
+nDados <- 38
+nParametrosEstimados <- 6
+Ttab <- qt(0.975, nDados - nParametrosEstimados)
+Ttab
+```
+
+Obtendo o p-valor. Como o $T_{calculado}$ foi acima de 0 iremos calcular uma área a direita, então o p-valor será a área mais próxima multiplicada por 2.
+
+```{r}
+Sabor.pvalue <- (1 - pt(Sabor.Tcal, nDados - nParametrosEstimados)) * 2
+Sabor.pvalue
+```
+
+Como o $T_{cal} (3.837102) > T_{tabelo} (2.036933)$ eu rejeito H0 ao nível de confiança de 95% ou ao nível de significância de 5%, ou seja, o **Sabor** influencia na qualidade do vinho ao nível de 95% de confiança ou ao nível de 5% de significância. p-valor = 0.0005522334.
+
+- Aplicando o modelo removendo a Claridade e o Corpo:
+
+Como todos os valores do p-valor são significados eu rejeto de que os parâmetros (variáveis) **Aroma**, **Sabor** e **Afinação** não influenciam no modelo.
+
+```{r}
+U <- lm(wine.data$Qua~ wine.data$Aroma + wine.data$Sabor + wine.data$Afina)
+U.summary <- summary(U)
+U.summary
+```
+
+- Realizando uma análise de resíduo no novo modelo:
+
+Fazendo um teste da normalidade
+
+```{r}
+normalidade <- nortest::ad.test(U$residuals)
+normalidade
+```
+
+Como o p-valor é maior do que o nível de significância (0.05) eu não rejeito $H_0$ ao nívelde confiança de 95%, ou seja, eu adoto a normalidade ao nível de confiança de 95%.
+
+- Avaliando a homocedasticidade
+
+Para isso iremos fazer um diagrama de dispersão entre os resíduos e $\widehat{Y}$ esperando um padrão aleatório:
+
+```{r}
+plot(U$fitted.values, U$residuals)
+```
+
+Como se observa um padrão aleatório podemos dizer que os dados são homocedásticos, porém para melhorar o processo de decisão iremos fazer um teste de hipótese usando o teste Geral de White:
+
+
+```{r}
+homocedastico <- lmtest::bptest(U,~fitted(U)+I(fitted(U)^2))
+homocedastico
+```
+
+Logo, pelo teste de hipótese Geral de White eu posso dizer que os dados são homocedásticos porque o p-valor =  0.2621 é maior do que o nível de significância 0.05 assim eu não rejeito a hipótese $H_0$ de dados homocedásticos.
+
+- Analisando a autocorrelação:
+
+Apesar de não se fazer tanto sentido nesse contexto, pois não temos informações sobre como os dados foram coletados e em qual ordem, iremos fazer por uma razão didática.
+
+Gerando gráficos para verificar a autocorrelação :
+
+```{r}
+residuos <- U$residuals
+par(mfrow=c(2,3))
+
+plot(residuos[2:n], residuos[1:n-1],main = 'Ordem 1')
+plot(residuos[3:n], residuos[1:(n-2)], main = 'Ordem 2')
+plot(residuos[4:n], residuos[1:(n-3)], main = 'Ordem 3')
+```
+
+Os gráficos são inconclusivos, para termos certeza vamos realizar o teste de Hipótese de **Breusch-Godfrey**:
+
+```{r}
+autocorrelacao.ordem.1 <- lmtest::bgtest (U , order=1)
+autocorrelacao.ordem.1
+autocorrelacao.ordem.2 <- lmtest::bgtest (U , order=2)
+autocorrelacao.ordem.2
+autocorrelacao.ordem.3 <- lmtest::bgtest (U , order=3)
+autocorrelacao.ordem.3
+```
+
+A hipótese $H_0$ é que os dados são **não autocorrelacionados** e como o p-valor é menor do que o nível de significância (0.05) (para as ordens 1,2 e 3) eu **REJEITO** $H_0$ ao nível de confiança de 95% ou **REJEITO** $H_0$ ao nível de significância de 5%.
+
+Logo, eu **REJEITO** a hipótese de que os dados **são não autocorrelacionados**, ou seja, há uma autocorrelação nos dados.
+
+Portanto, o nosso modelo explica a qualidade do vinho em função das variáveis **Aroma**, **Sabor** e **Afinação**.
+
+#### **g)Construa um intervalo de previsão para a Qualidade do vinho [Aroma=5,5;Sabor=5,1;Afinação5,0]. Utilize abordagem analítica e Bootstrap não paramétrico.**
+
+- Utilizando a abordagem analítica
+
+Vamos aplicar a fórmula do Intervalo de Previsão:
+
+
+$\widehat{y}_0 - t_{\alpha/2,n-p} \sqrt{\widehat{\sigma}^2(1+x'_0 (X'X)^{-1}x_0 )} \leq Y_o \leq \widehat{y}_0 + t_{\alpha/2,n-p} \sqrt{\widehat{\sigma}^2(1+x'_0 (X'X)^{-1}x_0 )}$
+
+- Para isso, precisamos ter as estimativas dos $\widehat{\beta1}$, $\widehat{\beta2}$, $\widehat{\beta3}$, $\widehat{\beta4}$, $\widehat{\beta5}$:
+
+```{r}
+U <- lm(wine.data$Qua~ wine.data$Aroma + wine.data$Sabor + wine.data$Afina)
+estimado.beta0 <- U$coefficients[1]
+estimado.beta1 <- U$coefficients[2]
+estimado.beta2 <- U$coefficients[3]
+estimado.beta3 <- U$coefficients[4]
+```
+
+- Calculando a matrix $x_o$:
+
+```{r}
+x0<-matrix(c(1,5.5,5.1,5), 4, 1)
+x0
+```
+
+- Calculando $t_{\alpha/2,n-p}$:
+
+```{r}
+nDados <- 38
+nParametrosEstimados <- 4
+
+T <- qt(0.975,nDados - nParametrosEstimados)
+T
+```
+
+- Calculando $\widehat{y}_0$:
+
+```{r}
+yp <- estimado.beta0 + estimado.beta1*5.5 + estimado.beta2*5.1 + estimado.beta3*5
+yp
+```
+
+- Calculando a variância do modelo:
+
+```{r}
+dp <- summary(U)$sigma
+dp
+variancia.modelo <- dp^2
+variancia.modelo
+```
+
+- Criando a matriz X
+
+```{r}
+X <- model.matrix(U)
+XT <- t(X)
+
+X1 <- XT%*%X
+X2 <- solve(X1)
+X3 <- t(x0)%*%X2
+X4 <- X3%*%x0
+r <- variancia.modelo*(1+X4)
+rr <- r^0.5
+LSP <- yp + T * rr
+LIP <- yp - T * rr
+c(LIP, LSP)
+
+rr1 <- (vm*X4)^0.5
+m <- rr/rr1
+```
+
+Logo, os Limites Inferiores e Superiores calculados pelo método analítico são [10.33522, 15.19412].

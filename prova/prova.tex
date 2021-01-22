@@ -1,0 +1,437 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={R Notebook},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{R Notebook}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+\hypertarget{prova-de-especializauxe7uxe3o}{%
+\section{Prova de Especialização}\label{prova-de-especializauxe7uxe3o}}
+
+\begin{itemize}
+\tightlist
+\item
+  Primeiramente vamos importar os dados:
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{wine.data <-}\StringTok{ }\NormalTok{readxl}\OperatorTok{::}\KeywordTok{read_excel}\NormalTok{(}\StringTok{'exe.xlsx'}\NormalTok{, }\StringTok{'D'}\NormalTok{)}
+\KeywordTok{head}\NormalTok{(wine.data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 6
+##   Clari Aroma Corpo Sabor Afina   Qua
+##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+## 1     1   3.3   2.8   3.1   4.1   9.8
+## 2     1   4.4   4.9   3.5   3.9  12.6
+## 3     1   3.9   5.3   4.8   4.7  11.9
+## 4     1   3.9   2.6   3.1   3.6  11.1
+## 5     1   5.6   5.1   5.5   5.1  13.3
+## 6     1   4.6   4.7   5     4.1  12.8
+\end{verbatim}
+
+Os dados do vinho são referentes aos atributos Claridade, Aroma, Corpo,
+Sabor, Afinação e Qualidade. O nosso objetivo no estudo é relacionar os
+atributos Claridades, Aroma, Corpo, Sabor e Afinação com a Qualidade do
+vinho, ou seja, quais desses atributos interferem na qualidade.
+
+\hypertarget{a-estime-beta-pelo-muxe9todo-dos-muxednimos-quadrados.-explique-o-procedimento.}{%
+\paragraph{\texorpdfstring{\textbf{a) Estime \(\beta\) pelo método dos
+mínimos quadrados. Explique o
+procedimento.}}{a) Estime \textbackslash beta pelo método dos mínimos quadrados. Explique o procedimento.}}\label{a-estime-beta-pelo-muxe9todo-dos-muxednimos-quadrados.-explique-o-procedimento.}}
+
+O objetivo é saber os valores \(\widehat{\beta1}\),
+\(\widehat{\beta2}\), \(\widehat{\beta3}\), \(\widehat{\beta4}\),
+\(\widehat{\beta5}\) que minimize a soma\ldots{}
+
+Para isso, precisa-se calcular a \emph{Qualidade Estimada}
+(\(\widehat{Y}\)), que é:
+
+\[
+\widehat{Y} =  \beta0 + \beta1*Claridade + \beta2*Aroma + \beta3*Corpo + \beta4*Sabor + \beta5*Afinacao
+\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Claridade <-}\StringTok{ }\NormalTok{wine.data}\OperatorTok{$}\NormalTok{Clari}
+\NormalTok{Aroma <-}\StringTok{ }\NormalTok{wine.data}\OperatorTok{$}\NormalTok{Aroma}
+\NormalTok{Corpo <-}\StringTok{ }\NormalTok{wine.data}\OperatorTok{$}\NormalTok{Corpo}
+\NormalTok{Sabor <-}\StringTok{ }\NormalTok{wine.data}\OperatorTok{$}\NormalTok{Sabor}
+\NormalTok{Afinacao <-}\StringTok{ }\NormalTok{wine.data}\OperatorTok{$}\NormalTok{Afina}
+\NormalTok{Y <-}\StringTok{ }\NormalTok{wine.data}\OperatorTok{$}\NormalTok{Qua}
+
+\NormalTok{desvioY <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(betas) \{}
+\NormalTok{  Y.Estimado <-}\StringTok{ }\NormalTok{betas[}\DecValTok{1}\NormalTok{] }\OperatorTok{+}\StringTok{ }\NormalTok{betas[}\DecValTok{2}\NormalTok{]}\OperatorTok{*}\NormalTok{Claridade }\OperatorTok{+}\StringTok{ }\NormalTok{betas[}\DecValTok{3}\NormalTok{]}\OperatorTok{*}\NormalTok{Aroma }\OperatorTok{+}\StringTok{ }\NormalTok{betas[}\DecValTok{4}\NormalTok{]}\OperatorTok{*}\NormalTok{Corpo }\OperatorTok{+}\StringTok{ }\NormalTok{betas[}\DecValTok{5}\NormalTok{]}\OperatorTok{*}\NormalTok{Sabor }\OperatorTok{+}\StringTok{ }\NormalTok{betas[}\DecValTok{6}\NormalTok{]}\OperatorTok{*}\NormalTok{Afinacao}
+\NormalTok{  S <-}\StringTok{ }\KeywordTok{sum}\NormalTok{( (Y }\OperatorTok{-}\StringTok{ }\NormalTok{Y.Estimado)}\OperatorTok{^}\DecValTok{2}\NormalTok{ )}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+A função \texttt{desvioY}, calcula o resíduo dos Y
+(\(Qualidade Real - Qualidade Estimada\)), eleva ao quadrado para não
+haver números negativos eliminando números positivos e por fim soma
+tudo. É essa função que se gostaria que fosse a menor possível.
+
+Ou seja, o objetivo é saber os valores dos \(\widehat{\beta1}\),
+\(\widehat{\beta2}\), \(\widehat{\beta3}\), \(\widehat{\beta4}\),
+\(\widehat{\beta5}\) que minimize a soma S.
+
+Aplicando a função \texttt{optim} temos os betas procurados:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{R}\FloatTok{.2}\NormalTok{ <-}\StringTok{ }\KeywordTok{optim}\NormalTok{(}\DataTypeTok{par =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{), }\DataTypeTok{fn =}\NormalTok{ desvioY, }\DataTypeTok{method =} \StringTok{"L-BFGS-B"}\NormalTok{)}
+\NormalTok{R}\FloatTok{.2}\OperatorTok{$}\NormalTok{par}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  3.9962004  2.3384721  0.4826345  0.2732280  1.1682793 -0.6837678
+\end{verbatim}
+
+Executando a regressão linear para ter valores matemáticos mais exatos,
+temos:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{U <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(Y}\OperatorTok{~}\NormalTok{Claridade}\OperatorTok{+}\NormalTok{Aroma}\OperatorTok{+}\NormalTok{Corpo}\OperatorTok{+}\NormalTok{Sabor}\OperatorTok{+}\NormalTok{Afinacao)}
+\NormalTok{U}\OperatorTok{$}\NormalTok{coefficients}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## (Intercept)   Claridade       Aroma       Corpo       Sabor    Afinacao 
+##   3.9968648   2.3394535   0.4825505   0.2731612   1.1683238  -0.6840102
+\end{verbatim}
+
+Comparando os valores dos \(\widehat{betas}\) pelo método dos mínimos
+quadrados com os valores reais da regressão linear, observamos que os
+valores estão bem próximos.
+
+\hypertarget{b-vocuxea-concorda-que-uma-relauxe7uxe3o-linear-uxe9-adequada-como-avaliaria-no-caso-da-regressuxe3o-linear-muxfaltipla}{%
+\paragraph{\texorpdfstring{\textbf{b) Você concorda que uma relação
+linear é adequada? Como avaliaria no caso da Regressão Linear
+Múltipla?}}{b) Você concorda que uma relação linear é adequada? Como avaliaria no caso da Regressão Linear Múltipla?}}\label{b-vocuxea-concorda-que-uma-relauxe7uxe3o-linear-uxe9-adequada-como-avaliaria-no-caso-da-regressuxe3o-linear-muxfaltipla}}
+
+Caso tivéssemos a variável de resposta Y relacionada com uma única
+variável independente X, seria suficiente fazer um diagrama de dispersão
+do relacionando Y com X. Porém, nós temos 5 variáveis (dimensões), sem
+adicionar o Y.
+
+Portanto, precisamos fazer um gráfico de dispersão do resíduo com cada
+uma das variáveis independentes (Claridade, Aroma, Corpo, Sabor,
+Afinacao), esperando um padrão aleatório em cada um desses gráficos.
+
+Lembrando que \emph{Resídio} é tudo que não foi explicado da qualidade
+do vinho.
+
+Plotando os gráficos relacionando as variávies independentes (Claridade,
+Aroma, Corpo, Sabor, Afinacao) em relação com o Resíduo \emph{não} se
+observa um padrão linear em nenhuma delas.
+
+Logo, é razoável se trabalhar com uma Regressão Linear, pois o que se
+sobrou no resíduo não possui efeito não linear no modelo.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+
+\KeywordTok{plot}\NormalTok{(Claridade, U}\OperatorTok{$}\NormalTok{residuals)}
+\KeywordTok{plot}\NormalTok{(Aroma, U}\OperatorTok{$}\NormalTok{residuals)}
+\KeywordTok{plot}\NormalTok{(Corpo, U}\OperatorTok{$}\NormalTok{residuals)}
+\KeywordTok{plot}\NormalTok{(Sabor, U}\OperatorTok{$}\NormalTok{residuals)}
+\KeywordTok{plot}\NormalTok{(Afinacao, U}\OperatorTok{$}\NormalTok{residuals)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{prova_files/figure-latex/unnamed-chunk-4-1.pdf}
+\#\#\#\# \textbf{c)Estime a variância da componente erro utilizando um
+estimador não viciado (\(\sigma^2\)). Explique o procedimento}
+
+A variância não viciada do componente erro trata-se da variância dos
+resíduos corrigida pelo número de parâmetro estimados, logo:
+
+\$\sigma\^{}2 = Var(residuos) / (n - Quantidade De Parâmetros Estimados)
+\$
+
+\emph{Observação: utilizamos do artifício matemático de multiplicar por
+(n -1) para eliminar o denominador da fórmula utilizada no cálculo da
+variância dos resíduos.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n <-}\StringTok{ }\DecValTok{38}
+\NormalTok{quantidadeParametrosEstimados <-}\StringTok{ }\DecValTok{6}
+\NormalTok{sigma}\FloatTok{.2}\NormalTok{ <-}\StringTok{ }\KeywordTok{var}\NormalTok{(U}\OperatorTok{$}\NormalTok{residuals) }\OperatorTok{*}\StringTok{ }\NormalTok{(n }\DecValTok{-1}\NormalTok{ ) }\OperatorTok{/}\StringTok{ }\NormalTok{(n }\OperatorTok{-}\StringTok{ }\NormalTok{quantidadeParametrosEstimados)}
+\NormalTok{sigma}\FloatTok{.2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.3515
+\end{verbatim}
+
+\hypertarget{d-estime-a-variuxe2ncia-de-widehatbeta_4-relativo-ao-sabor.-explique-o-procedimento.}{%
+\paragraph{\texorpdfstring{\textbf{d) Estime a variância de
+\(\widehat{\beta_4}\) (relativo ao sabor). Explique o
+procedimento.}}{d) Estime a variância de \textbackslash widehat\{\textbackslash beta\_4\} (relativo ao sabor). Explique o procedimento.}}\label{d-estime-a-variuxe2ncia-de-widehatbeta_4-relativo-ao-sabor.-explique-o-procedimento.}}
+
+Iremos estimar a variância através da matriz utilizando a estimativa de
+mínimos quadrados de \(\beta = (X'X)^-1\)
+
+\begin{itemize}
+\tightlist
+\item
+  Para obtermos a Matriz de planejamento X:
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X <-}\StringTok{ }\KeywordTok{model.matrix}\NormalTok{(U)}
+\KeywordTok{head.matrix}\NormalTok{(X)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   (Intercept) Claridade Aroma Corpo Sabor Afinacao
+## 1           1         1   3.3   2.8   3.1      4.1
+## 2           1         1   4.4   4.9   3.5      3.9
+## 3           1         1   3.9   5.3   4.8      4.7
+## 4           1         1   3.9   2.6   3.1      3.6
+## 5           1         1   5.6   5.1   5.5      5.1
+## 6           1         1   4.6   4.7   5.0      4.1
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  Calculando a transposta da matriz:
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X.linha <-}\StringTok{ }\KeywordTok{t}\NormalTok{(X)}
+\KeywordTok{head.matrix}\NormalTok{(X.linha)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##               1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17
+## (Intercept) 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0
+## Claridade   1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 0.5 0.8 0.7 1.0 0.9 1.0
+## Aroma       3.3 4.4 3.9 3.9 5.6 4.6 4.8 5.3 4.3 4.3 5.1 3.3 5.9 7.7 7.1 5.5 6.3
+## Corpo       2.8 4.9 5.3 2.6 5.1 4.7 4.8 4.5 4.3 3.9 4.3 5.4 5.7 6.6 4.4 5.6 5.4
+## Sabor       3.1 3.5 4.8 3.1 5.5 5.0 4.8 4.3 3.9 4.7 4.5 4.3 7.0 6.7 5.8 5.6 4.8
+## Afinacao    4.1 3.9 4.7 3.6 5.1 4.1 3.3 5.2 2.9 3.9 3.6 3.6 4.1 3.7 4.1 4.4 4.6
+##              18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34
+## (Intercept) 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0
+## Claridade   1.0 1.0 0.9 0.9 1.0 0.7 0.7 1.0 1.0 1.0 1.0 1.0 1.0 1.0 0.8 1.0 1.0
+## Aroma       5.0 4.6 3.4 6.4 5.5 4.7 4.1 6.0 4.3 3.9 5.1 3.9 4.5 5.2 4.2 3.3 6.8
+## Corpo       5.5 4.1 5.0 5.4 5.3 4.1 4.0 5.4 4.6 4.0 4.9 4.4 3.7 4.3 3.8 3.5 5.0
+## Sabor       5.5 4.3 3.4 6.6 5.3 5.0 4.1 5.7 4.7 5.1 5.0 5.0 2.9 5.0 3.0 4.3 6.0
+## Afinacao    4.1 3.1 3.4 4.8 3.8 3.7 4.0 4.7 4.9 5.1 5.1 4.4 3.9 6.0 4.7 4.5 5.2
+##              35  36  37  38
+## (Intercept) 1.0 1.0 1.0 1.0
+## Claridade   0.8 0.8 0.8 0.8
+## Aroma       5.0 3.5 4.3 5.2
+## Corpo       5.7 4.7 5.5 4.8
+## Sabor       5.5 4.2 3.5 5.7
+## Afinacao    4.8 3.3 5.8 3.5
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  Multiplica a tranposta (X') por X:
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X1 <-}\StringTok{ }\NormalTok{X.linha}\OperatorTok{%*%}\NormalTok{X}
+\KeywordTok{head.matrix}\NormalTok{(X1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##             (Intercept) Claridade  Aroma  Corpo  Sabor Afinacao
+## (Intercept)        38.0     35.10 184.20 178.00 181.20   161.70
+## Claridade          35.1     32.99 170.45 163.25 166.97   149.98
+## Aroma             184.2    170.45 936.24 880.95 908.67   789.78
+## Corpo             178.0    163.25 880.95 858.92 869.05   760.86
+## Sabor             181.2    166.97 908.67 869.05 903.14   776.10
+## Afinacao          161.7    149.98 789.78 760.86 776.10   708.23
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  Calculando a inversa de \((X'X)^-1\):
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X.inversa <-}\StringTok{ }\KeywordTok{solve}\NormalTok{(X1)}
+\KeywordTok{head.matrix}\NormalTok{(X.inversa)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##             (Intercept)   Claridade        Aroma       Corpo       Sabor
+## (Intercept)  3.68538435 -2.16087923  0.056193065 -0.29618518 -0.02052109
+## Claridade   -2.16087923  2.22687731 -0.081481738  0.16333471  0.01106341
+## Aroma        0.05619307 -0.08148174  0.054922315 -0.01420775 -0.03576244
+## Corpo       -0.29618518  0.16333471 -0.014207755  0.08183244 -0.02875529
+## Sabor       -0.02052109  0.01106341 -0.035762437 -0.02875529  0.06859675
+## Afinacao    -0.10580781 -0.07494938 -0.002367866 -0.00752418 -0.00205549
+##                 Afinacao
+## (Intercept) -0.105807813
+## Claridade   -0.074949380
+## Aroma       -0.002367866
+## Corpo       -0.007524180
+## Sabor       -0.002055490
+## Afinacao     0.054417686
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  Calculando a variância do modelo:
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{U.summary <-}\StringTok{ }\KeywordTok{summary}\NormalTok{(U)}
+\NormalTok{variancia.modelo <-}\StringTok{ }\NormalTok{(U.summary}\OperatorTok{$}\NormalTok{sigma)}\OperatorTok{^}\DecValTok{2}
+\NormalTok{variancia.modelo}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.3515
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  Por fim, calculando a variância de \(\widehat{\beta_4}\). Observamos
+  na matriz \emph{X.inversa} (calculada acima) que o valor da estimativa
+  do mínimo quadrado de \(\widehat{\beta_4}\) (sabor) encontra-se na
+  linha 5 e coluna 5.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{beta4.variancia <-}\StringTok{ }\NormalTok{variancia.modelo }\OperatorTok{*}\StringTok{ }\NormalTok{X.inversa[}\DecValTok{5}\NormalTok{,}\DecValTok{5}\NormalTok{]}
+\NormalTok{beta4.variancia}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.09270852
+\end{verbatim}
+
+\end{document}

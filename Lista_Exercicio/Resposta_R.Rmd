@@ -1,0 +1,150 @@
+---
+title: "Análise: Nível de Hidrocarboneto x Pureza "
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+printf <- function(...) cat(sprintf(...))
+```
+
+# 
+
+## Bootstrap Paramétrico
+
+Temos a seguinte hipótese:
+
+$$\begin{array}{ccc}
+H_0: \beta1 = 0 \\
+H_0: \beta1  \neq 0 
+\end{array}$$
+
+E considerando que os nossos dados seguem um modelo de regressão linear, temos:
+
+$$PUREZA = \beta0 + \beta1*NIVEL\_HIDROCARBONETO + ERRO$$
+
+Onde erro é:
+
+$$ERRO \thicksim N(0;\sigma^2)$$
+
+
+### - Realizando a leitura dos dados:
+
+```{r analysis, results="markup"}
+rawdata <- readxl::read_excel('nivel_hidrocarboneto_data.xlsx')
+head(rawdata)
+```
+
+
+Plotando um gráfico de relação dispersão entre as variáves Nível de Hidrocarboneto e pureza com uma linha de dentência observamos na Figura abaixo um relação linear entre as duas variáveis.
+
+```{r}
+plot(rawdata$NIVEL_HIDROCARBONETO,rawdata$PUREZA, xlab="Nivel Hidrocarboneto", ylab="Pureza", main="Nivel Hidrocarbonet x Pureza", pch=15, col="blue")
+U <- lm(rawdata$PUREZA ~ rawdata$NIVEL_HIDROCARBONETO)
+abline(U)
+```
+
+Com isso, podemos ter o valor de $\beta0$ e $\beta1$:
+
+```{r}
+beta0 <- U$coefficients[1]
+beta0
+beta1 <- U$coefficients[2]
+beta1
+```
+
+```{r}
+W <- summary(U)
+W
+beta1.sd <- W$coefficients[4]
+beta1.sd
+
+Tobs <- beta1 / beta1.sd
+paste('Tobs = ', Tobs)
+```
+
+**Logo**: 
+
+$\widehat{PUREZA} = 74.28331 + 14.94748 * NIVEL\_HIDROCARBONETO$. 
+
+**E**
+
+$RESIDUO = Y - \widehat{Y}$
+
+```{r}
+U$residuals
+```
+
+**E**
+
+$$
+\sigma^2 = (\sum r_i^2) / n - 2 = 1,180545382 \\ 
+\sigma = \sqrt{\sigma^2} = 1,086529053
+$$
+```{r}
+sigma <- summary(U)$sigma
+paste('Sigma = ',sigma)
+variancia <- sigma^2
+paste('Variancia = ',variancia)
+```
+
+### - Realizando simulação Bootstrap
+
+Executando a simulação n vezes e armazenando o resultado:
+
+```{r}
+corridas <- 5000
+GG <- matrix(0, corridas, 1)
+for(i in 1:corridas){
+  #Sob H0 temos B1=0
+  Y <- beta0 + 0 * rawdata$NIVEL_HIDROCARBONETO + rnorm(length(rawdata$NIVEL_HIDROCARBONETO), 0, sigma)
+  Reg <- lm(Y ~ rawdata$NIVEL_HIDROCARBONETO)
+  W1 <- summary(Reg)
+  GG[i,1] <- Reg$coefficients[2]
+}
+```
+
+```{r}
+LimitesA <- quantile(GG[,1]/(var(GG[,1])^0.5), c(.025, .975))
+printf(c("LI = %f", "|| LS = %f\n"), LimitesA)
+
+pvalue <- 2*mean(GG[,1]/(var(GG[,1])^0.5)>Tobs)
+paste('p-value = ', pvalue)
+```
+
+
+Como $T_obs (11.3517264901251) > LS (1.818325)$ então Rejeitamos $H_0: beta1 = 0$ ao nível de 5% de significância ou confiança de 95%. p-value calculado foi de 0.
+
+O histograma de GG[,1] terá aproximadamente uma distribuição T com n-2 gl.
+
+```{r}
+hist(GG[, 1])
+```
+
+## Bootstrap Não Paramétrico
+
+Observe que nossas as análises anteriores usamos a Hipótese de que os resíduos são normais (indicativo que o erro é normal). E se os resíduos não forem normais usaremos o **Bootstrap Não Paramétrico**.
+
+Isto significa que não podemos usar a normalidade dos resíduos. Portanto, no momento de realizar o experimento temos que substituir para uma amostra aleatória, ou seja, trocamos o método *rnomr* por *sample*, conforme exemplo abaixo:
+
+```{r}
+corridas <- 50000
+GG <- matrix(0, corridas, 1)
+n <- length(rawdata$NIVEL_HIDROCARBONETO)
+for(i in 1:corridas){
+  #Sob H0 temos B1=0
+  Y <- beta0 + 0 * rawdata$NIVEL_HIDROCARBONETO + sample(U$residuals, n, replace = TRUE)
+  Reg <- lm(Y ~ rawdata$NIVEL_HIDROCARBONETO)
+  W1 <- summary(Reg)
+  GG[i,1] <- Reg$coefficients[2] / beta1.sd
+}
+```
+
+```{r}
+LimitesA <- quantile(GG[,1], c(.025, .975))
+printf(c("LI = %f", "|| LS = %f\n"), LimitesA)
+
+pvalue <- 2 * mean( GG[,1] > Tobs)
+printf("p-value = %.10f", pvalue)
+```
+
