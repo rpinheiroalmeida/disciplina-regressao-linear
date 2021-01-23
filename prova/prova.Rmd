@@ -491,9 +491,195 @@ rr <- r^0.5
 LSP <- yp + T * rr
 LIP <- yp - T * rr
 c(LIP, LSP)
-
-rr1 <- (vm*X4)^0.5
-m <- rr/rr1
 ```
 
-Logo, os Limites Inferiores e Superiores calculados pelo método analítico são [10.33522, 15.19412].
+Logo, os Limites Inferiores e Superiores calculados pelo **método analítico** são [10.33522, 15.19412].
+
+- Fazendo o intervalo de previsão através do Bootstrap não-paramétrico.
+
+-- Calculando a razão:
+
+```{r}
+rr1 <- (vm*X4)^0.5
+m <- rr/rr1
+m
+```
+
+- Executando Bootstrap não paramétrico:
+
+```{r}
+
+GG <- matrix(0, corridas, 1)
+U <- lm(wine.data$Qua~wine.data$Aroma+wine.data$Sabor+wine.data$Afina)
+eB0 <- U$coefficients[1]
+eB1 <- U$coefficients[2]
+eB2 <- U$coefficients[3]
+eB3 <- U$coefficients[4]
+
+dp <- summary(U)$sigma
+
+for(i in 1:corridas){
+  Y1 <- eB0 + eB1*wine.data$Aroma + eB2*wine.data$Sabor + eB3*wine.data$Afina +sample(U$residuals,38,TRUE)
+
+  U1 <- lm(Y1~wine.data$Aroma + wine.data$Sabor + wine.data$Afina)
+  eB0p <- U1$coefficients[1]
+  eB1p <- U1$coefficients[2]
+  eB2p <- U1$coefficients[3]
+  eB3p <- U1$coefficients[4]
+  YP <- eB0p+eB1p*5.5+eB2p*5.1+eB3p*5
+
+  GG[i,1] <- YP
+}
+```
+
+- Calculando os Limites:
+
+```{r}
+LimitesA <- quantile(GG[,1], c(.025, .975))
+
+LimitesA
+
+LINF <- yp - (yp-LimitesA[1])*m
+LSUP <- yp + (LimitesA[2]-yp)*m
+
+LimetesAjustados <- c(LINF, LSUP)
+LimetesAjustados
+```
+
+#### **h)Calcule os coeficientes de correlações parciais para as variáveis do modelo final adotado em f).**
+
+O coeficiente de correlação parcial é calculado para cada uma das variáveis finais do modelo, logo ele é a correlação entre **Aroma** e a **Qualidade** removendo o efeito das variáveis **Afinação** e **Sabor** e assim por diante, relacionando cada uma das variáveis de forma isolada com a **Qualidade**.
+
+- Correlação entre **Aroma** e a **Qualidade** (variável resposta):
+
+O problema da correlação abaixo é que as influências das variáveis Sabor e Afinação são consideradas.
+
+```{r}
+cor(wine.data$Qua, wine.data$Aroma)
+```
+
+Logo:
+
+- Teremos que calcular o coeficiente parcial entre a Qualidade do vinho e o Aroma. Para fazer isso, teremos que retirar do Aroma o efeito das variáveis Sabor e Afinação:
+
+```{r}
+regressaoAroma <- lm(wine.data$Aroma~wine.data$Sabor + wine.data$Afina)
+regressaoAroma
+```
+
+- Retirar os efeitos das variáveis Sabor e Afinação da Qualidade:
+
+```{r}
+regressaoQualidade <- lm(wine.data$Qua~wine.data$Sabor + wine.data$Afina)
+regressaoQualidade
+```
+
+- Calculando a correlação entre Aroma e Qualidade:
+
+Os resíduos dessas regressões são justamente as partes isoladas dos efeitos do Sabor e da Afinação, portanto temos o resultado parcial da correlação entre o Aroma e Qualidade, excluindo os efeitos das variáveis Sabor e Afinação:
+
+```{r}
+cor(regressaoAroma$residuals, regressaoQualidade$residuals)
+```
+
+- Correlação entre **Sabor** e a **Qualidade** (variável resposta):
+
+O problema da correlação abaixo é que as influências das variáveis Aroma e Afinação são consideradas.
+
+```{r}
+cor(wine.data$Qua, wine.data$Sabor)
+```
+
+Logo:
+
+- Teremos que calcular o coeficiente parcial entre a Qualidade do vinho e o Sabor. Para fazer isso, teremos que retirar do Sabor o efeito das variáveis Aroma e Afinação:
+
+```{r}
+regressaoSabor <- lm(wine.data$Sabor~wine.data$Aroma + wine.data$Afina)
+regressaoSabor
+```
+
+- Retirar os efeitos das variáveis Aroma e Afinação da Qualidade:
+
+```{r}
+regressaoQualidade <- lm(wine.data$Qua~wine.data$Aroma + wine.data$Afina)
+regressaoQualidade
+```
+
+- Calculando a correlação entre Sabor e Qualidade:
+
+Os resíduos dessas regressões são justamente as partes isoladas dos efeitos do Aroma e da Afinação, portanto temos o resultado parcial da correlação entre o Sabor e Qualidade, excluindo os efeitos das variáveis Aroma e Afinação:
+
+```{r}
+cor(regressaoSabor$residuals, regressaoQualidade$residuals)
+```
+
+- Correlação entre **Afinação** e a **Qualidade** (variável resposta):
+
+O problema da correlação abaixo é que as influências das variáveis **Sabor** e **Aroma** são consideradas.
+
+```{r}
+cor(wine.data$Qua, wine.data$Afina)
+```
+
+Logo:
+
+- Teremos que calcular o coeficiente parcial entre a **Qualidade** do vinho e a **Afinação**. Para fazer isso, teremos que retirar da **Afinação** o efeito das variáveis **Sabor** e **Aroma**:
+
+```{r}
+regressaoAfinacao <- lm(wine.data$Afina~wine.data$Sabor + wine.data$Aroma)
+regressaoAfinacao
+```
+
+- Retirar os efeitos das variáveis **Sabor** e **Aroma** da **Qualidade**:
+
+```{r}
+regressaoQualidade <- lm(wine.data$Qua~wine.data$Sabor + wine.data$Aroma)
+regressaoQualidade
+```
+
+- Calculando a correlação entre **Afinação** e **Qualidade**:
+
+Os resíduos dessas regressões são justamente as partes isoladas dos efeitos do **Sabor** e **Aroma**, portanto temos o resultado parcial da correlação entre o **Afinação** e **Qualidade**, excluindo os efeitos das variáveis **Sabor** e **Aroma** :
+
+```{r}
+cor(regressaoAfinacao$residuals, regressaoQualidade$residuals)
+```
+
+Com isso concluimos que se aumentamos a **Afinação** do vinho estamos prejudicando a **Qualidade**.
+
+#### **i)Argumente sobre a possibilidade de multicolinearidade no modelo final obtido em f).**
+
+Para isso precisamos calcular o fator de infração da variância para cada variável, sendo que FIV (Fator Infração Variância é): $FIV_j = 1 / (1 - R^2_j)$, sendo que $R^2$ é o valor do $R^2$ calculado a partir da regressão entre as variáveis, por exemplo:
+
+- Para **Aroma**, $R^2_j$  é o $R^2$ do aroma em função do Sabor e Afinação:
+
+```{r}
+aroma.multicolinearidade <- lm(wine.data$Aroma ~ wine.data$Sabor + wine.data$Afina)
+aroma.multicolinearidade.summary <- summary(aroma.multicolinearidade)
+aroma.R2 <- aroma.multicolinearidade.summary$r.squared
+aroma.FIV <- 1 / (1 - aroma.R2)
+aroma.FIV
+```
+
+- Para **Sabor**, $R^2_j$  é o $R^2$ do aroma em função do Aroma e Afinação:
+
+```{r}
+sabor.multicolinearidade <- lm(wine.data$Sabor ~ wine.data$Aroma + wine.data$Afina)
+sabor.multicolinearidade.summary <- summary(sabor.multicolinearidade)
+sabor.R2 <- sabor.multicolinearidade.summary$r.squared
+sabor.FIV <- 1 / (1 - sabor.R2)
+sabor.FIV
+```
+
+- Para **Afinação**, $R^2_j$  é o $R^2$ do aroma em função do Sabor e Aroma:
+
+```{r}
+afinacao.multicolinearidade <- lm(wine.data$Afina ~ wine.data$Aroma + wine.data$Sabor)
+afinacao.multicolinearidade.summary <- summary(afinacao.multicolinearidade)
+afinacao.R2 <- afinacao.multicolinearidade.summary$r.squared
+afinacao.FIV <- 1 / (1 - afinacao.R2)
+afinacao.FIV
+```
+
+
